@@ -21,10 +21,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.navigation3.runtime.NavEntry
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entry
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -43,6 +47,9 @@ private data object RouteA : NavKey
 @Serializable
 private data class RouteB(val id: String) : NavKey
 
+@Serializable
+data class RouteC(val id: String) : NavKey
+
 class BasicSaveableActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,25 +61,32 @@ class BasicSaveableActivity : ComponentActivity() {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                entryProvider = { key ->
-                    when (key) {
-                        is RouteA -> NavEntry(key) {
-                            ContentGreen("Welcome to Nav3") {
-                                Button(onClick = {
-                                    backStack.add(RouteB("123"))
-                                }) {
-                                    Text("Click to navigate")
-                                }
+                entryDecorators = listOf(
+                    rememberSceneSetupNavEntryDecorator(),
+                    rememberSavedStateNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                    StoreKeyToSavedStateDecorator,
+                ),
+                entryProvider = entryProvider {
+                    entry<RouteA> {
+                        ContentGreen("Welcome to Nav3") {
+                            Button(onClick = {
+                                backStack.add(RouteC("123"))
+                            }) {
+                                Text("Click to navigate")
                             }
                         }
+                    }
+                    entry<RouteB> { key ->
+                        ContentBlue("Route id: ${key.id} ")
+                    }
 
-                        is RouteB -> NavEntry(key) {
-                            ContentBlue("Route id: ${key.id} ")
-                        }
-
-                        else -> {
-                            error("Unknown route: $key")
-                        }
+                    entry<RouteC> { key ->
+                        ScreenC(
+                            navigateToScreenA = {
+                                backStack.add(RouteA)
+                            },
+                        )
                     }
                 }
             )
