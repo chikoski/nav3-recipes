@@ -48,7 +48,7 @@ private data object RouteA : NavKey
 private data class RouteB(val id: String) : NavKey
 
 @Serializable
-data class RouteC(val id: String) : NavKey
+data class RouteC(val id: Int) : NavKey
 
 class BasicSaveableActivity : ComponentActivity() {
 
@@ -71,7 +71,7 @@ class BasicSaveableActivity : ComponentActivity() {
                     entry<RouteA> {
                         ContentGreen("Welcome to Nav3") {
                             Button(onClick = {
-                                backStack.add(RouteC("123"))
+                                backStack.add(RouteC(123))
                             }) {
                                 Text("Click to navigate")
                             }
@@ -81,7 +81,11 @@ class BasicSaveableActivity : ComponentActivity() {
                         ContentBlue("Route id: ${key.id} ")
                     }
 
-                    entry<RouteC> { key ->
+                    entry<RouteC>(
+                        clazzContentKey = {
+                            it
+                        }
+                    ) { key ->
                         ScreenC(
                             navigateToScreenA = {
                                 backStack.add(RouteA)

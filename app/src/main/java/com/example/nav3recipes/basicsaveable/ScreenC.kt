@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nav3recipes.content.ContentGreen
 
@@ -13,9 +15,11 @@ fun ScreenC(
     navigateToScreenA: () -> Unit,
     screenCViewModel: ScreenCViewModel = viewModel()
 ) {
+    val name by screenCViewModel.name.collectAsStateWithLifecycle()
+
     ContentGreen(screenCViewModel.message) {
         Column {
-            Text(screenCViewModel.name)
+            Text(name)
 
             if (screenCViewModel.keys.isNotEmpty()) {
                 Text("Keys: ${screenCViewModel.keys.joinToString()}")
